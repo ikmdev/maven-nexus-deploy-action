@@ -3,10 +3,6 @@ description: A composite action to ensure that code builds correctly
 
 # Inputs
 inputs:
-  branch_name: 
-    description: "Current Branch"
-    required: true
-    default: "main"
   nexus_repo_id:
     description: "Nexus Repository ID" 
     required: true
@@ -17,7 +13,7 @@ inputs:
     default: "admin"
   nexus_repo_password:
     description: "Nexus Repository Password"  
-    required: false
+    required: true
   nexus_repo_url:
     description: "Nexus Repository URL"
     required: false 
