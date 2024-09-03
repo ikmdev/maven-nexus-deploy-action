@@ -1,0 +1,59 @@
+name: Maven Clean Install Action
+description: A composite action to ensure that code builds correctly
+
+# Inputs
+inputs:
+  branch_name: 
+    description: "Current Branch"
+    required: true
+    default: "main"
+  nexus_repo_id:
+    description: "Nexus Repository ID" 
+    required: true
+    default: "maven-snapshots"
+  nexus_repo_username:
+    description: "Nexus Repository Username" 
+    required: false 
+    default: "admin"
+  nexus_repo_password:
+    description: "Nexus Repository Password"  
+    required: false
+  nexus_repo_url:
+    description: "Nexus Repository URL"
+    required: false 
+    default: "https://nexus.tinkarbuild.com" 
+  nexus_profile: 
+    description: "Nexus Profile"
+    default: "inject-application-properties"
+
+runs:
+  using: "composite" 
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Maven Settings File
+      uses: whelk-io/maven-settings-xml-action@v22
+      with:
+        servers: '[{"id": "${{inputs.nexus_repo_id}}", "username": "${{inputs.nexus_repo_username}}", "password": "${{inputs.nexus_repo_password}}"}]'
+        profiles: '[{"id": "${{inputs.nexus_profile}}", "properties": {"altDeploymentRepository": "${{inputs.nexus_repo_id}}::${{ inputs.nexus_repo_url }}/repository/${{inputs.nexus_repo_id}}"}}]'
+        active_profiles: '["${{inputs.nexus_profile}}"]' 
+        output_file: .m2/settings.xml
+
+    - name: Deploy To Nexus
+      shell: bash
+      run: |
+          ./mvnw deploy \
+            --batch-mode \
+            -e \
+            -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
+            -DskipTests \
+            -DskipITs \
+            -Dmaven.main.skip \
+            -Dmaven.test.skip \
+            -Dmaven.wagon.http.ssl.insecure=true \
+            -Dmaven.wagon.http.ssl.allowall=true \
+            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+            -DrepositoryId='${{inputs.nexus_repo_id}}' 
+
+
