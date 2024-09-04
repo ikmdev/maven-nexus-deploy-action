@@ -47,8 +47,8 @@ runs:
             -DskipITs \
             -Dmaven.main.skip \
             -Dmaven.test.skip \
-            -Dmaven.wagon.http.ssl.insecure='true' \
-            -Dmaven.wagon.http.ssl.allowall='true' \
+            -Dmaven.wagon.http.ssl.insecure=true \
+            -Dmaven.wagon.http.ssl.allowall=true \
             -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -DrepositoryId='${{inputs.nexus_repo_id}}' 
 
