@@ -33,7 +33,7 @@ jobs:
 
       - name: Pick Nexus Repo ID
         id: nexusRepoID
-        if: inputs.IS_TAG == 'true'
+        if: inputs.is_tag == 'true'
         run: |
           echo "NEXUS_RELEASE_ID=maven-releases" >> $GITHUB_OUTPUT
 
