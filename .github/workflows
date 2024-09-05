@@ -1,0 +1,47 @@
+name: Nexus Publish Workflow
+
+run-name: 'Nexus Publish Workflow -- ${{ github.head_ref || github.ref_name }}'
+
+on:
+  workflow_call:
+    inputs:
+      repo_owner:
+        type: string
+        description: "Repository Owner"
+        required: true
+      branch_name:
+        type: string
+        description: "Branch Name"
+        required: true
+      is_tag:
+        type: string
+        description: "Is Tag Version"
+        required: true
+
+jobs:
+  build-job:
+    name: Build Job
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+            java-version: '21'
+            distribution: 'zulu'
+
+      - name: Print Branch
+        run: echo ${{env.BRANCH_NAME}}
+
+      - name: Pick Nexus Repo ID
+        id: nexusRepoID
+        if: inputs.IS_TAG == 'true'
+        run: |
+          echo "NEXUS_RELEASE_ID=maven-releases" >> $GITHUB_OUTPUT
+
+      - name: Deploy Artifacts To Nexus
+        if: inputs.repo_owner == 'ikmdev'
+        uses: ikmdev/maven-nexus-deploy-action@main
+        with:
+          nexus_repo_id: ${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || 'maven-snapshots'}}
+          nexus_repo_password: ${{secrets.EC2_NEXUS_PASSWORD}}
+  
+  
