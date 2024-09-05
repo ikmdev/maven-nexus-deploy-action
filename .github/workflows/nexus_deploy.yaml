@@ -29,7 +29,7 @@ jobs:
             distribution: 'zulu'
 
       - name: Print Branch
-        run: echo ${{env.BRANCH_NAME}}
+        run: echo ${{inputs.branch_name}}
 
       - name: Pick Nexus Repo ID
         id: nexusRepoID
