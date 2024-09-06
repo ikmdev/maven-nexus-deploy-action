@@ -51,8 +51,8 @@ runs:
     - name: Maven Settings File
       uses: whelk-io/maven-settings-xml-action@v22
       with:
-        servers: '[{"id": "${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}", "username": "${{inputs.nexus_repo_username}}", "password": "${{inputs.nexus_repo_password}}"}]'
-        profiles: '[{"id": "${{inputs.nexus_profile}}", "properties": {"altDeploymentRepository": "${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}::${{ inputs.nexus_repo_url }}/repository/${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}"}}]'
+        servers: '[{"id": "${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}", "username": "${{inputs.nexus_repo_username}}", "password": "${{inputs.nexus_repo_password}}"}]'
+        profiles: '[{"id": "${{inputs.nexus_profile}}", "properties": {"altDeploymentRepository": "${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}::${{ inputs.nexus_repo_url }}/repository/${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}"}}]'
         active_profiles: '["${{inputs.nexus_profile}}"]' 
         output_file: .m2/settings.xml
 
@@ -68,6 +68,6 @@ runs:
             -Dmaven.main.skip \
             -Dmaven.test.skip \
             -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
-            -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}' 
+            -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
 
 
