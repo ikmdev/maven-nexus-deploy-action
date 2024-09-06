@@ -27,6 +27,9 @@ inputs:
   branch_name: 
     description: "Branch Name" 
     required: true 
+  working_directory:
+    description: "Working Directory"
+    required: true
 
 
 runs:
@@ -43,6 +46,7 @@ runs:
       shell: bash
       run: |
           echo "POM_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+      working-directory: ${{inputs.working_directory}}
     
     - name: Nexus Repo Release ID
       id: nexusRepoID
@@ -50,6 +54,7 @@ runs:
       shell: bash
       run: |
             echo "NEXUS_RELEASE_ID=maven-releases" >> $GITHUB_OUTPUT
+      
 
     - name: Maven Settings File
       uses: whelk-io/maven-settings-xml-action@v22
@@ -69,6 +74,7 @@ runs:
             -DskipTests \
             -DskipITs \
             -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
-            -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
+            -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}'
+      working-directory: ${{inputs.working_directory}}
 
 
