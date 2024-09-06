@@ -27,9 +27,6 @@ inputs:
   branch_name: 
     description: "Branch Name" 
     required: true 
-  is_tag:
-    description: "Is Tag"
-    required: true
 
 
 runs:
@@ -40,10 +37,16 @@ runs:
       with:
         repository: ${{inputs.repo_name}}
         ref: ${{inputs.branch_name}}
+
+    - name: Extract Version
+      id: get_current_version
+      shell: bash
+      run: |
+          echo "POM_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
     
-    - name: Pick Nexus Repo ID
+    - name: Nexus Repo Release ID
       id: nexusRepoID
-      if: inputs.is_tag == 'true'
+      if: ${{ !contains(steps.get_current_version.outputs.POM_VERSION, '-SNAPSHOT')}}
       shell: bash
       run: |
             echo "NEXUS_RELEASE_ID=maven-releases" >> $GITHUB_OUTPUT
