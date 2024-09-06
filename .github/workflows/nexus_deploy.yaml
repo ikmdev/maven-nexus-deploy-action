@@ -28,9 +28,6 @@ jobs:
             java-version: '21'
             distribution: 'zulu'
 
-      - name: Print Branch
-        run: echo ${{inputs.branch_name}}
-
       - name: Pick Nexus Repo ID
         id: nexusRepoID
         if: inputs.is_tag == 'true'

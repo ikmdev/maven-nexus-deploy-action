@@ -5,7 +5,7 @@ description: A composite action to ensure that code builds correctly
 inputs:
   nexus_repo_id:
     description: "Nexus Repository ID" 
-    required: true
+    required: false
     default: "maven-snapshots"
   nexus_repo_username:
     description: "Nexus Repository Username" 
@@ -21,18 +21,38 @@ inputs:
   nexus_profile: 
     description: "Nexus Profile"
     default: "inject-application-properties"
+  repo_name: 
+    description: "Repo Name"
+    required: true
+  branch_name: 
+    description: "Branch Name" 
+    required: true 
+  is_tag:
+    description: "Is Tag"
+    required: true
+
 
 runs:
   using: "composite" 
   steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+      with:
+        repository: ${{inputs.repo_name}}
+        ref: ${{inputs.branch_name}}
+    
+    - name: Pick Nexus Repo ID
+      id: nexusRepoID
+      if: inputs.is_tag == 'true'
+      shell: bash
+      run: |
+            echo "NEXUS_RELEASE_ID=maven-releases" >> $GITHUB_OUTPUT
 
     - name: Maven Settings File
       uses: whelk-io/maven-settings-xml-action@v22
       with:
-        servers: '[{"id": "${{inputs.nexus_repo_id}}", "username": "${{inputs.nexus_repo_username}}", "password": "${{inputs.nexus_repo_password}}"}]'
-        profiles: '[{"id": "${{inputs.nexus_profile}}", "properties": {"altDeploymentRepository": "${{inputs.nexus_repo_id}}::${{ inputs.nexus_repo_url }}/repository/${{inputs.nexus_repo_id}}"}}]'
+        servers: '[{"id": "${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}", "username": "${{inputs.nexus_repo_username}}", "password": "${{inputs.nexus_repo_password}}"}]'
+        profiles: '[{"id": "${{inputs.nexus_profile}}", "properties": {"altDeploymentRepository": "${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}::${{ inputs.nexus_repo_url }}/repository/${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}"}}]'
         active_profiles: '["${{inputs.nexus_profile}}"]' 
         output_file: .m2/settings.xml
 
@@ -48,6 +68,6 @@ runs:
             -Dmaven.main.skip \
             -Dmaven.test.skip \
             -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
-            -DrepositoryId='${{inputs.nexus_repo_id}}' 
+            -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || "maven-snapshots" }}' 
 
 
