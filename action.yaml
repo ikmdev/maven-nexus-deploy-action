@@ -45,7 +45,7 @@ runs:
       id: get_current_version
       shell: bash
       run: |
-          echo "POM_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
       working-directory: ${{inputs.working_directory}}
     
     - name: Nexus Repo Release ID
