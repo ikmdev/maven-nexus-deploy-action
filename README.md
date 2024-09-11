@@ -1,37 +1,35 @@
 # Title
 
-|| Description about the Project ||
+This runs after a successful build. It is responsible for publishing artifacts to [Nexus](https://nexus.tinkarbuild.com).
 
 ### Team Ownership - Product Owner
 
-Team Ownership - Product Owner
+Automation Team
 
-## Getting Started
+## How to Use
 
-Required for running this:
+This workflow is automatically triggered after a successful build located in the `.github/workflows` folder, as described in the 
+[GitHub Documentation](https://docs.github.com/en/actions/writing-workflows/quickstart).  
 
-1. Download and install Open JDK Java 19
+```yaml
+jobs:
+  publish-artifacts:
+      name: Publish Artifacts
+      runs-on: ubuntu-24.04
+      if: github.event.workflow_run.conclusion == 'success' && github.repository_owner == 'ikmdev'
+      steps:
+      - uses: actions/setup-java@v4
+        with:
+                java-version: '21'
+                distribution: 'zulu'
 
-## Building and Running
 
-Follow the steps below to build and run Komet on your local machine:
-
-1. Clone the repository from GitHub to your local machine
-
-2. Change local directory to cloned repo location
-
-3. Enter the following command to build the application:
-
-Unix/Linux/OSX:
-
-```bash
-./mvnw clean install
-```
-
-Windows:
-
-```bash
-./mvnw.cmd clean install
+      - name: Deploy Artifacts To Nexus
+        uses: ikmdev/maven-nexus-deploy-action@main
+        with:
+            nexus_repo_password: ${{secrets.EC2_NEXUS_PASSWORD}}
+            repo_name: ${{github.event.workflow_run.head_repository.full_name}}
+            branch_name: ${{github.event.workflow_run.head_branch}}
 ```
 
 ## Issues and Contributions
