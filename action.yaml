@@ -17,7 +17,7 @@ inputs:
   nexus_repo_url:
     description: "Nexus Repository URL"
     required: false 
-    default: "https://nexus.tinkarbuild.com" 
+    default: "http://172.20.33.175:8081" 
   nexus_profile: 
     description: "Nexus Profile"
     default: "inject-application-properties"
@@ -61,7 +61,7 @@ runs:
       id: get_current_version
       shell: bash
       run: |
-          echo "POM_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
     
     - name: Nexus Repo Release ID
       id: nexusRepoID
@@ -81,13 +81,13 @@ runs:
     - name: Deploy To Nexus
       shell: bash
       run: |
-          ./mvnw deploy \
+          mvn deploy \
             --batch-mode \
             -e \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -DskipTests \
             -DskipITs \
-            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+            -s '/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
 
 
