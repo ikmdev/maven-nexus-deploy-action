@@ -42,7 +42,7 @@ runs:
       id: get_current_version
       shell: bash
       run: |
-          echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          echo "POM_VERSION=$(/root/.sdkman/candidates/maven/current/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
     
     - name: Nexus Repo Release ID
       id: nexusRepoID
@@ -62,7 +62,7 @@ runs:
     - name: Deploy To Nexus
       shell: bash
       run: |
-           mvn deploy \
+           /root/.sdkman/candidates/maven/current/bin/mvn deploy \
             --batch-mode \
             -e \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
