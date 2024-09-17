@@ -17,7 +17,7 @@ inputs:
   nexus_repo_url:
     description: "Nexus Repository URL"
     required: false 
-    default: "https://nexus.tinkarbuild.com" 
+    default: "http://172.20.33.175:8081" 
   nexus_profile: 
     description: "Nexus Profile"
     default: "inject-application-properties"
