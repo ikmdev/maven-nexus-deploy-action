@@ -1,5 +1,5 @@
-name: Maven Clean Install Action
-description: A composite action to ensure that code builds correctly
+name: Maven Nexus Publish Workflow
+description: A composite action to ensure that code is sent to Nexus repository
 
 # Inputs
 inputs:
