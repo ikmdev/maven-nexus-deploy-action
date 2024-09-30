@@ -17,7 +17,7 @@ inputs:
   nexus_repo_url:
     description: "Nexus Repository URL"
     required: false 
-    default: "http://172.20.33.175:8081" 
+    default: "https://nexus.tinkarbuild.com" 
   nexus_profile: 
     description: "Nexus Profile"
     default: "inject-application-properties"
@@ -68,7 +68,7 @@ runs:
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -DskipTests \
             -DskipITs \
-            -s '/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
 
 
