@@ -99,7 +99,7 @@ runs:
       id: get_settings_location
       shell: bash
       run: |
-        if [ $IS_SELF_HOSTED == 'true']; then
+        if [ $IS_SELF_HOSTED == 'true' ]; then
           echo "MAVEN_SETTINGS_FILE='/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml'" >> $GITHUB_OUTPUT
         else
           echo "MAVEN_SETTINGS_FILE='/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml'" >> $GITHUB_OUTPUT
