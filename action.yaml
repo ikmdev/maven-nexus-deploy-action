@@ -37,6 +37,28 @@ runs:
       with:
         repository: ${{inputs.repo_name}}
         ref: ${{inputs.branch_name}}
+    
+    - name: Build Protoc Docker container
+      uses: docker/build-push-action@v6
+      if: ${{github.event.repository.name}} == 'tinkar-schema'
+      with:
+        push: false
+        context: .
+        file: protoc.dockerfile
+        tags: tinkar-schema-protoc:latest
+  
+  
+    - name: Generate Java Code
+      shell: bash
+      if: ${{github.event.repository.name}} == 'tinkar-schema'
+      run: |
+        sudo docker run -v ./src/main/java-generated:/home/proto-builder/src/main/java-generated --rm tinkar-schema-protoc:latest
+        
+    - name: list java code
+      shell: bash
+      if: ${{github.event.repository.name}} == 'tinkar-schema'
+      run: |
+        ls src/main/java-generated
 
     - name: Extract Version
       id: get_current_version
