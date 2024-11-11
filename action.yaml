@@ -30,6 +30,10 @@ inputs:
   working_directory:
     description: "Working Directory"
     required: false
+  is_self_hosted:
+    description: "Is Self Hosted Runner"
+    required: false
+    default: "false"
 
 
 runs:
@@ -67,8 +71,14 @@ runs:
       id: get_current_version
       shell: bash
       run: |
-          echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          if [ $IS_SELF_HOSTED != 'true' ]; then
+            echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          else
+            echo "POM_VERSION=$(/root/.sdkman/candidates/maven/current/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+          fi
       working-directory: ${{inputs.working_directory}}
+      env:
+        IS_SELF_HOSTED: ${{inputs.is_self_hosted}}
     
     - name: Nexus Repo Release ID
       id: nexusRepoID
@@ -85,6 +95,18 @@ runs:
         active_profiles: '["${{inputs.nexus_profile}}"]' 
         output_file: .m2/settings.xml
 
+    - name: Settings Location
+      id: get_settings_location
+      shell: bash
+      run: |
+        if [ $IS_SELF_HOSTED == 'true']; then
+          echo "MAVEN_SETTINGS_FILE='/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml'" >> $GITHUB_OUTPUT
+        else
+          echo "MAVEN_SETTINGS_FILE='/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml'" >> $GITHUB_OUTPUT
+        fi
+      env:
+        IS_SELF_HOSTED: ${{inputs.is_self_hosted}}
+
     - name: Deploy To Nexus
       shell: bash
       if: github.event.repository.name != 'jpms-deps'
@@ -95,8 +117,9 @@ runs:
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -DskipTests \
             -DskipITs \
-            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+            -s ${{steps.get_settings_location.outputs.MAVEN_SETTINGS_FILE}} \
             -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
+
 
     - name: Deploy To Nexus (JPMS-DEPS)
       shell: bash
@@ -108,7 +131,7 @@ runs:
           -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
           -DskipTests \
           -DskipITs \
-          -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+          -s ${{steps.get_settings_location.outputs.MAVEN_SETTINGS_FILE}} \
           -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
       working-directory: ${{inputs.working_directory}}
 
