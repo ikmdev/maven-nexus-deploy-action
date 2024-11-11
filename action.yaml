@@ -27,6 +27,9 @@ inputs:
   branch_name: 
     description: "Branch Name" 
     required: true 
+  working_directory:
+    description: "Working Directory"
+    required: false
 
 
 runs:
@@ -65,6 +68,7 @@ runs:
       shell: bash
       run: |
           echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+      working-directory: ${{inputs.working_directory}}
     
     - name: Nexus Repo Release ID
       id: nexusRepoID
@@ -83,6 +87,7 @@ runs:
 
     - name: Deploy To Nexus
       shell: bash
+      if: ${{github.event.repository.name}} != 'jpms-deps'
       run: |
            mvn deploy \
             --batch-mode \
@@ -92,5 +97,19 @@ runs:
             -DskipITs \
             -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
+
+    - name: Deploy To Nexus (JPMS-DEPS)
+      shell: bash
+      if: ${{github.event.repository.name}} == 'jpms-deps'
+      run: |
+          mvn deploy \
+          --batch-mode \
+          -e \
+          -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
+          -DskipTests \
+          -DskipITs \
+          -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+          -DrepositoryId='${{ steps.nexusRepoID.outputs.NEXUS_RELEASE_ID || inputs.nexus_repo_id }}' 
+      working-directory: ${{inputs.working_directory}}
 
 
