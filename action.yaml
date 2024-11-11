@@ -101,8 +101,10 @@ runs:
       run: |
         if [ $IS_SELF_HOSTED == 'true' ]; then
           echo "MAVEN_SETTINGS_FILE='/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml'" >> $GITHUB_OUTPUT
+          echo "MAVEN_DEPLOY_COMMAND='/root/.sdkman/candidates/maven/current/bin/mvn deploy'" >> $GITHUB_OUTPUT
         else
           echo "MAVEN_SETTINGS_FILE='/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml'" >> $GITHUB_OUTPUT
+          echo "MAVEN_DEPLOY_COMMAND='mvn deploy'" >> $GITHUB_OUTPUT
         fi
       env:
         IS_SELF_HOSTED: ${{inputs.is_self_hosted}}
@@ -111,7 +113,7 @@ runs:
       shell: bash
       if: github.event.repository.name != 'jpms-deps'
       run: |
-           mvn deploy \
+           ${{steps.get_settings_location.outputs.MAVEN_DEPLOY_COMMAND}} \
             --batch-mode \
             -e \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
@@ -125,7 +127,7 @@ runs:
       shell: bash
       if: github.event.repository.name == 'jpms-deps'
       run: |
-          mvn deploy \
+          ${{steps.get_settings_location.outputs.MAVEN_DEPLOY_COMMAND}} \
           --batch-mode \
           -e \
           -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
