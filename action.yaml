@@ -87,7 +87,7 @@ runs:
 
     - name: Deploy To Nexus
       shell: bash
-      if: ${{github.event.repository.name}} != 'jpms-deps'
+      if: github.event.repository.name != 'jpms-deps'
       run: |
            mvn deploy \
             --batch-mode \
@@ -100,7 +100,7 @@ runs:
 
     - name: Deploy To Nexus (JPMS-DEPS)
       shell: bash
-      if: ${{github.event.repository.name}} == 'jpms-deps'
+      if: github.event.repository.name == 'jpms-deps'
       run: |
           mvn deploy \
           --batch-mode \
