@@ -34,7 +34,10 @@ inputs:
     description: "Is Self Hosted Runner"
     required: false
     default: "false"
-
+  java_version:
+    description: "Java Version"
+    required: false
+    default: "23"
 
 runs:
   using: "composite" 
@@ -44,6 +47,11 @@ runs:
       with:
         repository: ${{inputs.repo_name}}
         ref: ${{inputs.branch_name}}
+
+    - uses: actions/setup-java@v4
+      with:
+        java-version: ${{inputs.java_version}}
+        distribution: 'zulu'
     
     - name: Build Protoc Docker container
       uses: docker/build-push-action@v6
